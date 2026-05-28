@@ -1,0 +1,35 @@
+---
+- name: Install and configure nginx
+  hosts: webservers
+  become: yes
+  vars:
+    nginx_web_root: /var/www/html
+
+  tasks:
+    - name: Install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Ensure nginx is running and enabled
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Ensure web root exists
+      ansible.builtin.file:
+        path: "{{ nginx_web_root }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Upload index file
+      ansible.builtin.copy:
+        src: files/index.html
+        dest: "{{ nginx_web_root }}/index.html"
+        owner: www-data
+        group: www-data
+        mode: '0644'
